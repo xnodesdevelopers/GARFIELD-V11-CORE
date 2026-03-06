@@ -1,0 +1,28 @@
+{
+  "name": "garfield-bot",
+  "version": "11.0.0",
+  "description": "GARFIELD WhatsApp Bot - Xnodes Development",
+  "main": "index.js",
+  "scripts": {
+    "start": "pm2 start index.js --name garfield --max-memory-restart 450M --restart-delay 3000 --no-autorestart && pm2 logs garfield",
+    "stop": "pm2 stop garfield",
+    "restart": "pm2 restart garfield",
+    "logs": "pm2 logs garfield",
+    "status": "pm2 status"
+  },
+  "dependencies": {
+    "@google/genai": "^1.44.0",
+    "@whiskeysockets/baileys": "latest",
+    "another-fb-video-downloader": "latest",
+    "axios": "^1.13.6",
+    "node-cache": "latest",
+    "pino": "latest",
+    "playwright": "^1.58.2",
+    "qrcode-terminal": "latest",
+    "wa-sticker-formatter": "^4.4.4",
+    "yt-search": "^2.13.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
