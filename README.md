@@ -8,10 +8,11 @@
 
 ```
  ██████╗  █████╗ ██████╗ ███████╗██╗███████╗██╗     ██████╗     ██╗   ██╗ ██╗ ██╗
-██║  ███╗███████║██████╔╝█████╗  ██║█████╗  ██║     ██║  ██║    ██║   ██║╚██║╚██║
+██╔════╝ ██╔══██╗██╔══██╗██╔════╝██║██╔════╝██║     ██╔══██╗    ██║   ██║███║ ██║
+██║  ███╗███████║██████╔╝█████╗  ██║█████╗  ██║     ██║  ██║    ██║   ██║╚██║ ██║
 ██║   ██║██╔══██║██╔══██╗██╔══╝  ██║██╔══╝  ██║     ██║  ██║    ╚██╗ ██╔╝ ██║ ██║
 ╚██████╔╝██║  ██║██║  ██║██║     ██║███████╗███████╗██████╔╝     ╚████╔╝  ██║ ██║
- ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝╚═════╝       ╚═══╝   ╚═╝ ╚═╝ 
+ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝╚═════╝       ╚═══╝   ╚═╝ ╚═╝
 ```
 
 <div align="center">
@@ -20,7 +21,7 @@
 
 <br/>
 
-![Version](https://img.shields.io/badge/VERSION-10.0.0-00ffcc?style=for-the-badge&logo=github&logoColor=black&labelColor=0a0a0a)
+![Version](https://img.shields.io/badge/VERSION-11.0.0-00ffcc?style=for-the-badge&logo=github&logoColor=black&labelColor=0a0a0a)
 ![Platform](https://img.shields.io/badge/PLATFORM-ANY-ff6600?style=for-the-badge&logo=windows&logoColor=white&labelColor=0a0a0a)
 ![API](https://img.shields.io/badge/API-BAILEYS-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=0a0a0a)
 ![Node](https://img.shields.io/badge/NODE.JS-20+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white&labelColor=0a0a0a)
@@ -29,6 +30,34 @@
 ![Status](https://img.shields.io/badge/STATUS-ACTIVE-00ff88?style=for-the-badge&logoColor=white&labelColor=0a0a0a)
 
 </div>
+
+<br/>
+
+---
+
+<br/>
+
+## 🔌 &nbsp; `𝖠𝖱𝖢𝖧𝖨𝖳𝖤𝖢𝖳𝖴𝖱𝖤`
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                                                                          │
+│   WhatsApp Web  ──►  Baileys (WebSocket)  ──►  Node.js Runtime          │
+│                                    │                                     │
+│                          GARFIELD BOT v11 Logic                          │
+│                                    │                                     │
+│              command.js  ◄──  plugins/  ──►  ctx object                 │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+| Layer | Technology | Role |
+|:---:|:---:|:---|
+| 🌐 **WhatsApp Client** | `@whiskeysockets/baileys` | Core WA API — messages, media, groups |
+| ⚙️ **Runtime** | `Node.js 20+` | Bot logic, plugin system, file handling |
+| 🎬 **Media Engine** | `FFmpeg` | Video & audio processing and conversion |
+| 🌐 **Scraper** | `Playwright + Chromium` | YouTube audio, news scraping |
+| 🤖 **AI Engine** | `Gemini 2.5 Flash` | AI replies via Google GenAI |
 
 <br/>
 
@@ -51,11 +80,16 @@
 ║      YouTube MP3/M4A · Facebook Video · Android APK                  ║
 ║      Sri Lanka News · Format conversion via FFmpeg                   ║
 ╠══════════════════════════════════════════════════════════════════════╣
+║  🤖  GEMINI AI                                                       ║
+║      Ask anything · Powered by Google Gemini 2.0 Flash               ║
+║      Safe error handling · Works without API key too                 ║
+╠══════════════════════════════════════════════════════════════════════╣
 ║  🛡️  GROUP MANAGEMENT                                                ║
 ║      Anti bad words auto-delete · Member list with @mentions         ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║  🔧  PLUGIN ARCHITECTURE                                             ║
-║      Drop JS files into /plugins — auto loaded on startup            ╠══════════════════════════════════════════════════════════════════════╣
+║      Drop JS files into /plugins — auto loaded on startup            ║
+╠══════════════════════════════════════════════════════════════════════╣
 ║  🌍  CROSS PLATFORM                                                  ║
 ║      Windows · macOS · Linux · VPS · Any server                      ║
 ╚══════════════════════════════════════════════════════════════════════╝
@@ -76,6 +110,7 @@
 | `.menu` | 🎬 Video Menu | `CORE` |
 | `.alive` | 💚 Bot uptime & status | `CORE` |
 | `.owner` | 👤 Developer info | `INFO` |
+| `.ai <query>` | 🤖 Ask Gemini AI | `AI` |
 | `.song <query>` | 🎵 YouTube MP3 | `MEDIA` |
 | `.play <query>` | 🎧 YouTube M4A | `MEDIA` |
 | `.fb <url>` | 🎬 Facebook video | `MEDIA` |
@@ -142,9 +177,10 @@ npx playwright install chromium
 nano config.js
 ```
 ```js
-OWNER_NUMBER: '94711234567',   // your number without +
-PREFIX:       '.',
-MODE:         'public',
+OWNER_NUMBER:   '94711234567',  // your number without +
+PREFIX:         '.',
+MODE:           'public',
+GEMINI_API_KEY: 'your_key_here', // optional — get from aistudio.google.com
 ```
 
 <br/>
@@ -220,9 +256,10 @@ npx playwright install chromium
 notepad config.js
 ```
 ```js
-OWNER_NUMBER: '94711234567',   // your number without +
-PREFIX:       '.',
-MODE:         'public',
+OWNER_NUMBER:   '94711234567',  // your number without +
+PREFIX:         '.',
+MODE:           'public',
+GEMINI_API_KEY: 'your_key_here', // optional
 ```
 
 <br/>
@@ -286,9 +323,10 @@ npx playwright install chromium
 nano config.js
 ```
 ```js
-OWNER_NUMBER: '94711234567',   // your number without +
-PREFIX:       '.',
-MODE:         'public',
+OWNER_NUMBER:   '94711234567',  // your number without +
+PREFIX:         '.',
+MODE:           'public',
+GEMINI_API_KEY: 'your_key_here', // optional
 ```
 
 <br/>
@@ -343,14 +381,6 @@ pm2 startup       # copy & run the command it gives you
 
 <br/>
 
-**View logs:**
-```bash
-npm run logs
-# Press Ctrl+C to exit logs
-```
-
-<br/>
-
 **Check if bot is running:**
 ```bash
 npm run status
@@ -381,19 +411,20 @@ GARFIELD-V11-CORE/
 ├── 📄 ecosystem.config.js    ← PM2 configuration
 │
 ├── 📁 plugins/               ← All commands (drop & auto-load)
-│   ├── alive.js
-│   ├── antiBadWords.js
-│   ├── app.js
-│   ├── fb.js
-│   ├── members.js
-│   ├── menu.js
-│   ├── news.js
-│   ├── owner.js
-│   ├── play.js
-│   ├── song.js
-│   ├── sticker.js
-│   ├── toimage.js
-│   └── tomp3.js
+│   ├── ai.js                 ← Gemini AI (optional — needs API key)
+│   ├── alive.js              ← Bot status
+│   ├── antiBadWords.js       ← Auto delete bad words in groups
+│   ├── app.js                ← Android APK downloader
+│   ├── fb.js                 ← Facebook video downloader
+│   ├── members.js            ← Group member list with @mentions
+│   ├── menu.js               ← Video menu
+│   ├── news.js               ← Sri Lanka news (Helakuru Esana)
+│   ├── owner.js              ← Developer info
+│   ├── play.js               ← YouTube M4A download
+│   ├── song.js               ← YouTube MP3 download
+│   ├── sticker.js            ← Image/Video to sticker
+│   ├── toimage.js            ← Sticker to image/video
+│   └── tomp3.js              ← Video/Voice to MP3
 │
 ├── 📁 sessions/              ← Auto-generated (don't delete)
 └── 📁 lib/
@@ -419,21 +450,24 @@ npm run restart  # restart bot
 
 **QR expired?**
 ```bash
-# Delete session and re-scan
 rm -rf sessions/
 node index.js    # scan new QR
 ```
 
 **Sticker / tomp3 not working?**
 ```bash
-# Make sure ffmpeg is installed
-ffmpeg -version
+ffmpeg -version  # make sure ffmpeg is installed
 ```
 
 **Song / news not working?**
 ```bash
-# Make sure playwright chromium is installed
 npx playwright install chromium
+```
+
+**AI not working?**
+```
+Add GEMINI_API_KEY to config.js
+Get free key from → https://aistudio.google.com
 ```
 
 <br/>
@@ -444,15 +478,20 @@ npx playwright install chromium
 
 ## 🏆 &nbsp; `𝖦𝖨𝖵𝖤  𝖢𝖱𝖤𝖣𝖨𝖳`
 
-> **This is the 100% original project — every file, every plugin, every line of code built from scratch by Tharindu Liyanage. If you use, fork, or deploy this — give proper credit. 🙏**
+> **This is the 100% original project — every file, every plugin, every line of code built from scratch by Tharindu Liyanage. If you use, fork, modify, or deploy this — you MUST give proper credit. 🙏**
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
-║   ✅  Keep the original developer name visible in your README        ║
+║   ✅  Keep original developer name visible in your README            ║
 ║   ✅  Link back to this repository in your fork or project           ║
-║   ✅  Do NOT remove the footer or claim this as your own original    ║
-║   ✅  A simple credit line costs nothing — it supports open source   ║
+║   ✅  If you MODIFY this code — mention Tharindu Liyanage, Xnodes    ║
+║   ✅  If you FORK this repo — credit the original author             ║
+║   ✅  Do NOT remove the footer or claim as your own original         ║
+║   ✅  A simple credit costs nothing — it supports open source        ║
+║                                                                      ║
+║   ❌  Do NOT reupload without credit                                 ║
+║   ❌  Do NOT sell or monetize without permission                     ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
@@ -460,7 +499,7 @@ npx playwright install chromium
 **Original Author:** [Tharindu Liyanage](https://github.com/xnodesdevelopers) · **Xnodes Development**
 **Repository:** `https://github.com/xnodesdevelopers/GARFIELD-V11-CORE`
 
-> *"Hours of real work went into building this from scratch. Respect that with a credit."*
+> *"Hours of real work went into building this from scratch. If you use it — just say where you got it. That's all."*
 
 <br/>
 
@@ -515,12 +554,12 @@ Use responsibly and comply with WhatsApp's Terms of Service.
 ```
 
 ### `© 2026  Ｘｎｏｄｅｓ  ·  All Rights Reserved`
-### `𝖯𝖮𝖶𝖤𝖱𝖤𝖣  𝖡𝖸  𝖦𝖠𝖱𝖥𝖨𝖤𝖫𝖣  𝖡𝖮𝖳   🐼🔥`
+### `𝖯𝖮𝖶𝖤𝖱𝖤𝖣  𝖡𝖸  𝖦𝖠𝖱𝖥𝖨𝖤𝖫𝖣  𝖡𝖮𝖳  𝖵𝟏𝟏  🐼🔥`
 
 <br/>
 
 *If this project helped you, drop a ⭐ on GitHub — it means the world!*
 
-`[ GARFIELD v10 · XNODES · THARINDU LIYANAGE · 2026 ]`
+`[ GARFIELD v11 · XNODES · THARINDU LIYANAGE · 2026 ]`
 
 </div>
