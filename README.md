@@ -515,7 +515,7 @@ Use responsibly and comply with WhatsApp's Terms of Service.
 ```
 
 ### `© 2026  Ｘｎｏｄｅｓ  ·  All Rights Reserved`
-### `𝖯𝖮𝖶𝖤𝖱𝖤𝖣  𝖡𝖸  𝖦𝖠𝖱𝖥𝖨𝖤𝖫𝖣  𝖡𝖮𝖳  𝖵𝟏𝟎  🐼🔥`
+### `𝖯𝖮𝖶𝖤𝖱𝖤𝖣  𝖡𝖸  𝖦𝖠𝖱𝖥𝖨𝖤𝖫𝖣  𝖡𝖮𝖳   🐼🔥`
 
 <br/>
 
