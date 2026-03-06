@@ -1,3 +1,10 @@
+/**
+ * ◈ GARFIELD-V11-CORE ◈
+ * * This architectural core is engineered for performance.
+ * Designed & Developed by Tharindu Liyanage
+ * * © 2026 Xnodes Laboratory. All rights reserved.
+ * ---------------------------------------------------------
+ */
 const { commands } = require('../command')
 
 const LOGO = 'https://github.com/Zenoixnoize/GARFIELD-WHATSAPP-BOT-v8/raw/asdf/Cloud/logo.png'
