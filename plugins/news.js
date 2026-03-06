@@ -1,5 +1,5 @@
 /**
- * Author: Tharindu Liyanage - Original Scraper
+ * Author: Tharindu Liyanage | Xnodes Development
  * GitHub: https://github.com/xnodesdevelopers
  */
 
@@ -7,6 +7,7 @@
 
 const { commands } = require('../command')
 const { chromium } = require('playwright')
+
 commands.push({
   pattern: 'news',
   alias:   ['esana'],
@@ -16,6 +17,7 @@ commands.push({
     let browser = null
     try {
       await reply('🔍 Searching latest Sri Lanka news...')
+
       browser = await chromium.launch({
         headless: true,
         args: [
@@ -26,46 +28,50 @@ commands.push({
           '--no-zygote',
         ]
       })
+
       const page = await browser.newPage()
       await page.route('**/*.{png,jpg,jpeg,gif,webp,css,woff,woff2,svg,ico,mp4,mp3}', r => r.abort())
+
       await page.goto('https://www.helakuru.lk/esana/', { waitUntil: 'domcontentloaded', timeout: 60000 })
-      await page.waitForFunction(() =>
-        Array.from(document.querySelectorAll('a')).some(a => a.href.includes('/esana/news/')),
+      await page.waitForFunction(
+        () => Array.from(document.querySelectorAll('a')).some(a => a.href.includes('/esana/news/')),
         { timeout: 20000 }
       )
-      const newsLink = await page.evaluate(() =>
-        Array.from(document.querySelectorAll('a')).find(a => a.href.includes('/esana/news/'))?.href || null
+
+      const newsLink = await page.evaluate(
+        () => Array.from(document.querySelectorAll('a')).find(a => a.href.includes('/esana/news/'))?.href || null
       )
       if (!newsLink) throw new Error('No news links found')
+
       await page.goto(newsLink, { waitUntil: 'domcontentloaded', timeout: 60000 })
       await page.waitForSelector('h2.news_title', { timeout: 15000 })
+
       const { title, content } = await page.evaluate(() => ({
-        title:   document.querySelector('h2.news_title')?.innerText.trim() || 'No Title',
+        title: document.querySelector('h2.news_title')?.innerText.trim() || 'No Title',
         content: Array.from(document.querySelectorAll('.news-single-content p.news_text'))
           .map(p => p.innerText.trim())
           .filter(t => t.length > 5)
-          .join('
-')
+          .join('\n\n')
       }))
+
       if (!content) throw new Error('Article content is empty')
-      await conn.sendMessage(from, {
-        text:
-          `📰 *HELAKURU ESANA*
-` +
-          `▬▬▬▬▬▬▬▬▬▬▬▬▬
-` +
-          `*${title}*
-` +
-          `${content}
-` +
-          `▬▬▬▬▬▬▬▬▬▬▬▬▬
-` +
-          `✅ *Verified News*
-` +
-          `📡 *Source:* Helakuru Esana
-` +
-          `💻 *Coded by:* Xnodes Development`
-      }, { quoted: mek })
+
+      const text = [
+        '📰 *HELAKURU ESANA*',
+        '▬▬▬▬▬▬▬▬▬▬▬▬▬',
+        '',
+        `*${title}*`,
+        '',
+        content,
+        '',
+        '▬▬▬▬▬▬▬▬▬▬▬▬▬',
+        '✅ *Verified News*',
+        '📡 *Source:* Helakuru Esana',
+        '💻 *Coded by:* Xnodes Development',
+      ].join('\n')
+
+      await conn.sendMessage(from, { text }, { quoted: mek })
+
     } catch (e) {
       await reply(`❌ Error: ${e.message}`)
     } finally {
