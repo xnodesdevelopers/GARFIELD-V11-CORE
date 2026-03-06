@@ -1,4 +1,4 @@
-# GARFIELD WhatsApp Bot v11 Stable
+# Garfield WhatsApp Bot v11 Stable
 
 <p align="center">
   <img src="https://github.com/Zenoixnoize/GARFIELD-WHATSAPP-BOT-v8/blob/asdf/Cloud/PicsArt_22-04-15_10-13-49-205.png" width="500"/>
