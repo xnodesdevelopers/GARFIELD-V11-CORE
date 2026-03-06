@@ -1,3 +1,10 @@
+/**
+ * ◈ GARFIELD-V11-CORE ◈
+ * * This architectural core is engineered for performance.
+ * Designed & Developed by Tharindu Liyanage
+ * * © 2026 Xnodes Laboratory. All rights reserved.
+ * ---------------------------------------------------------
+ */
 const { commands } = require('../command')
 const config = require('../config')
 const fs   = require('fs')
@@ -15,7 +22,7 @@ commands.push({
     const msg =
       `*${config.BOT_NAME || 'GARFIELD'} is Online!* 🐼🔥\n\n` +
       `*Runtime:* ${(process.uptime() / 60).toFixed(2)} mins\n` +
-      `*Version:* v10\n` +
+      `*Version:* v11\n` +
       `*Status:* High Speed & Optimized ⚡\n` +
       `*Platform:* Linux (Server)\n\n` +
       `> Type *${config.PREFIX}menu* to see all commands.\n` +
