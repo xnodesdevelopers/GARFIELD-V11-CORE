@@ -1,6 +1,9 @@
 /**
- * Author: Tharindu Liyanage | Xnodes Development 
- * GitHub: https://github.com/xnodesdevelopers
+ * ◈ GARFIELD-V11-CORE ◈
+ * * This architectural core is engineered for performance.
+ * Designed & Developed by Tharindu Liyanage
+ * * © 2026 Xnodes Laboratory. All rights reserved.
+ * ---------------------------------------------------------
  */
 
 'use strict'
