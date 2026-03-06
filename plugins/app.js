@@ -1,3 +1,10 @@
+/**
+ * ◈ GARFIELD-V11-CORE ◈
+ * * This architectural core is engineered for performance.
+ * Designed & Developed by Tharindu Liyanage
+ * * © 2026 Xnodes Laboratory. All rights reserved.
+ * ---------------------------------------------------------
+ */
 const { commands } = require('../command')
 const { pipeline } = require('stream/promises')
 const fs   = require('fs')
@@ -12,7 +19,7 @@ commands.push({
   react:   '📲',
   function: async (conn, mek, ctx) => {
     const { from, q, reply } = ctx
-    if (!q) return reply('📲 App name දෙන්න!\nExample: *.app instagram*')
+    if (!q) return reply('📲 App name !\nExample: *.app instagram*')
 
     await reply('🔍 Searching...')
 
