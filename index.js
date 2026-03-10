@@ -1,10 +1,11 @@
 /**
  * ◈ GARFIELD-V11-CORE ◈
- * * This architectural core is engineered for performance.
+ * This architectural core is engineered for performance.
  * Designed & Developed by Tharindu Liyanage
- * * © 2026 Xnodes Laboratory. All rights reserved.
+ * © 2026 Xnodes Laboratory. All rights reserved.
  * ---------------------------------------------------------
  */
+
 'use strict'
 
 const {
@@ -35,17 +36,23 @@ const CREDS_FILE  = path.join(SESSION_DIR, 'creds.json')
 
 const msgRetryCache = new NodeCache()
 
-// ── plugin loader ─────────────────────────────────────────────
+// ── global crash guards — never let process die ───────────────
+process.on('uncaughtException',      e => console.error('[CRASH]',    e.message))
+process.on('unhandledRejection',     e => console.error('[REJECTION]', e?.message || e))
+process.on('SIGTERM', () => {}) // ignore termination signal — PM2 handles it
+
+// ── plugin loader — load ONCE only ────────────────────────────
+let pluginsLoaded = false
 function loadPlugins() {
+  if (pluginsLoaded) return
+  pluginsLoaded = true
   const files = fs.readdirSync(PLUGINS_DIR).filter(f => f.endsWith('.js'))
   if (!files.length) return console.log('⚠️  No plugins found\n')
   console.log(`\n📦 Loading ${files.length} plugin(s)...`)
   let ok = 0
   for (const file of files) {
     try {
-      const p = path.join(PLUGINS_DIR, file)
-      delete require.cache[require.resolve(p)]
-      require(p)
+      require(path.join(PLUGINS_DIR, file))
       console.log(`   ✅ ${file}`)
       ok++
     } catch (e) {
@@ -136,31 +143,37 @@ function getSender(conn, mek) {
     from, sender, senderNum,
     pushname:  mek.pushName || 'User',
     isOwner:   senderNum === config.OWNER_NUMBER || isSelf,
-    isSelf,
-    isGroup,
+    isSelf, isGroup,
     isPrivate: !isGroup,
     groupJid:  isGroup ? from : null,
     botNumber,
   }
 }
 
+// ── processed message id cache — prevent double fire ──────────
+const processedIds = new Set()
+
 // ── message handler ───────────────────────────────────────────
 async function handleMessage(conn, mek) {
   try {
     if (!mek?.message) return
 
+    // deduplicate by message id — hard block any double fire
+    const msgId = mek.key?.id
+    if (!msgId || processedIds.has(msgId)) return
+    processedIds.add(msgId)
+    setTimeout(() => processedIds.delete(msgId), 60_000) // clean after 60s
+
     // unwrap ephemeral & viewOnce
     const topType = getContentType(mek.message)
-    if      (topType === 'ephemeralMessage')   mek.message = mek.message.ephemeralMessage.message
-    else if (topType === 'viewOnceMessage')    mek.message = mek.message.viewOnceMessage.message
-    else if (topType === 'viewOnceMessageV2')  mek.message = mek.message.viewOnceMessageV2.message
+    if      (topType === 'ephemeralMessage')   mek.message = mek.message.ephemeralMessage?.message
+    else if (topType === 'viewOnceMessage')    mek.message = mek.message.viewOnceMessage?.message
+    else if (topType === 'viewOnceMessageV2')  mek.message = mek.message.viewOnceMessageV2?.message
 
     if (!mek.message) return
 
     const from = mek.key.remoteJid
     if (!from || from === 'status@broadcast') return
-
-    // guard: group message must have participant
     if (from.endsWith('@g.us') && !mek.key.participant) return
 
     const who  = getSender(conn, mek)
@@ -172,12 +185,12 @@ async function handleMessage(conn, mek) {
     if (blocked) {
       return conn.sendMessage(from, {
         text: `*This Bot is not available in ${blocked} 🔒*\n` +
-              `Deploy your own:\nhttps://github.com/xnodesdevelopers/GARFIELD-WHATSAPP-BOT-v10\n` +
+              `Deploy your own:\nhttps://github.com/xnodesdevelopers/GARFIELD-V11-CORE\n` +
               `_Xnodes Development © 2026_`
       }, { quoted: mek })
     }
 
-    // mode gate — isSelf always passes
+    // mode gate
     if (!who.isSelf) {
       if (config.MODE === 'private' && !who.isOwner) return
       if (config.MODE === 'groups'  && !who.isGroup) return
@@ -230,7 +243,7 @@ async function handleMessage(conn, mek) {
       const plugin = commands.find(c => c.pattern === cmd)
                   || commands.find(c => c.alias?.includes(cmd))
       if (plugin) {
-        if (plugin.react) await react(plugin.react)
+        if (plugin.react) await react(plugin.react).catch(() => {})
         try   { await plugin.function(conn, mek, ctx) }
         catch (e) { console.error(`[CMD] ${cmd}:`, e.message) }
       }
@@ -257,68 +270,94 @@ async function handleMessage(conn, mek) {
   } catch (e) { console.error('[MSG]', e.message) }
 }
 
-// ── connect ───────────────────────────────────────────────────
+// ── reconnect with backoff ────────────────────────────────────
+let retryCount   = 0
+const MAX_RETRY  = 10
+const BASE_DELAY = 3000
+
 async function connectToWA() {
-  const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR)
-  const { version }          = await fetchLatestBaileysVersion()
+  try {
+    const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR)
+    const { version }          = await fetchLatestBaileysVersion()
 
-  console.log(fs.existsSync(CREDS_FILE)
-    ? '✅ Session found → connecting...\n'
-    : '📱 No session → scan QR below\n'
-  )
+    console.log(fs.existsSync(CREDS_FILE)
+      ? '✅ Session found → connecting...\n'
+      : '📱 No session → scan QR below\n'
+    )
 
-  const conn = makeWASocket({
-    version,
-    auth: {
-      creds: state.creds,
-      keys:  makeCacheableSignalKeyStore(state.keys, P({ level: 'silent' })),
-    },
-    logger:                         P({ level: 'silent' }),
-    printQRInTerminal:              false,
-    browser:                        ['Ubuntu', 'Chrome', '126.0.6478.127'],
-    syncFullHistory:                false,
-    markOnlineOnConnect:            false,
-    generateHighQualityLinkPreview: false,
-    getMessage:                     async () => undefined,
-    msgRetryCounterMap:             msgRetryCache,
-  })
+    const conn = makeWASocket({
+      version,
+      auth: {
+        creds: state.creds,
+        keys:  makeCacheableSignalKeyStore(state.keys, P({ level: 'silent' })),
+      },
+      logger:                         P({ level: 'silent' }),
+      printQRInTerminal:              false,
+      browser:                        ['Ubuntu', 'Chrome', '126.0.6478.127'],
+      syncFullHistory:                false,
+      markOnlineOnConnect:            false,
+      generateHighQualityLinkPreview: false,
+      getMessage:                     async () => undefined,
+      msgRetryCounterMap:             msgRetryCache,
+    })
 
-  // new conn = fresh listeners, no stacking on reconnect
-  conn.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
-    if (qr) {
-      qrcode.generate(qr, { small: true })
-      console.log('Scan the QR above with WhatsApp\n')
-    }
-    if (connection === 'open') {
-      console.log('🐼 GARFIELD BOT CONNECTED\n')
-      loadPlugins()
-    }
-    if (connection === 'close') {
-      const code = lastDisconnect?.error?.output?.statusCode
-      if (code === DisconnectReason.loggedOut) {
-        console.log('Logged out → clearing session')
-        fs.rmSync(SESSION_DIR, { recursive: true, force: true })
-        return process.exit(0)
+    conn.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
+      if (qr) {
+        qrcode.generate(qr, { small: true })
+        console.log('Scan the QR above with WhatsApp\n')
       }
-      console.log(`Reconnecting (${code})...`)
-      setTimeout(connectToWA, 3000)
+
+      if (connection === 'open') {
+        retryCount = 0   // reset retry counter on successful connect
+        console.log('🐼 GARFIELD v11 CONNECTED\n')
+        loadPlugins()
+      }
+
+      if (connection === 'close') {
+        const code = lastDisconnect?.error?.output?.statusCode
+
+        // logged out — clear session, exit cleanly
+        if (code === DisconnectReason.loggedOut) {
+          console.log('🔴 Logged out → clearing session')
+          fs.rmSync(SESSION_DIR, { recursive: true, force: true })
+          return process.exit(0)
+        }
+
+        // too many retries — exit and let PM2 restart fresh
+        if (retryCount >= MAX_RETRY) {
+          console.log(`🔴 Max retries (${MAX_RETRY}) reached → exiting for PM2 restart`)
+          return process.exit(1)
+        }
+
+        // exponential backoff — 3s, 6s, 12s... max 60s
+        const delay = Math.min(BASE_DELAY * Math.pow(2, retryCount), 60_000)
+        retryCount++
+        console.log(`🔄 Reconnecting in ${delay / 1000}s... (attempt ${retryCount}/${MAX_RETRY})`)
+        setTimeout(connectToWA, delay)
+      }
+    })
+
+    conn.ev.on('creds.update', saveCreds)
+
+    conn.ev.on('messages.upsert', ({ messages, type }) => {
+      if (type !== 'notify') return
+      handleMessage(conn, messages[0])
+    })
+
+    conn.decodeJid = (jid) => {
+      if (!jid) return jid
+      if (/:\d+@/gi.test(jid)) {
+        const d = jidDecode(jid) || {}
+        return d.user && d.server ? `${d.user}@${d.server}` : jid
+      }
+      return jid
     }
-  })
 
-  conn.ev.on('creds.update', saveCreds)
-
-  conn.ev.on('messages.upsert', ({ messages, type }) => {
-    if (type !== 'notify') return
-    handleMessage(conn, messages[0])
-  })
-
-  conn.decodeJid = (jid) => {
-    if (!jid) return jid
-    if (/:\d+@/gi.test(jid)) {
-      const d = jidDecode(jid) || {}
-      return d.user && d.server ? `${d.user}@${d.server}` : jid
-    }
-    return jid
+  } catch (e) {
+    console.error('[CONNECT ERROR]', e.message)
+    const delay = Math.min(BASE_DELAY * Math.pow(2, retryCount), 60_000)
+    retryCount++
+    setTimeout(connectToWA, delay)
   }
 }
 
