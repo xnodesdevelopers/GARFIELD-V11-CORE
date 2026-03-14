@@ -3,6 +3,7 @@
  * This architectural core is engineered for performance.
  * Designed & Developed by Tharindu Liyanage
  * © 2026 Xnodes Laboratory. All rights reserved.
+ * This Pluging not working for USA IP
  * ---------------------------------------------------------
  */
 
