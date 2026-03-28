@@ -1,5 +1,5 @@
 /**
- * ◈ GARFIELD-V11-CORE ◈ 
+ * ◈ GARFIELD-V11-CORE - fbdl v1.2◈ 
  * This architectural core is engineered for performance.
  * Designed & Developed by Tharindu Liyanage
  * © 2026 Xnodes Laboratory. All rights reserved.
