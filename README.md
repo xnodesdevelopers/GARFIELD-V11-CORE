@@ -563,3 +563,8 @@ Use responsibly and comply with WhatsApp's Terms of Service.
 `[ GARFIELD v11 · XNODES · THARINDU LIYANAGE · 2026 ]`
 
 </div>
+<br>
+
+<h1>Developer </h1>
+<b><table><tr><th>Tharindu Liyanage (Ｓａｎｋｕ）</th></tr><a href="https://github.com/"><img src="https://i.ibb.co/5t0yMZm/Picsart-26-01-20-16-26-45-304-1.jpg" width="180"></td></tr></table></b>
+</div>
