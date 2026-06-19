@@ -4,19 +4,50 @@
  * Designed & Developed by Tharindu Liyanage
  * © 2026 Xnodes Laboratory. All rights reserved.
  * ---------------------------------------------------------
+ * Updated for Baileys v7.x (ESM-only package) — see notes below.
  */
 
 'use strict'
 
-const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  DisconnectReason,
-  fetchLatestBaileysVersion,
-  makeCacheableSignalKeyStore,
-  getContentType,
-  jidDecode,
-} = require('@whiskeysockets/baileys')
+// ── Baileys v7+ ships as a pure ESM package, so a plain require() of it
+//    throws ERR_REQUIRE_ESM. Rather than rewriting every plugin file
+//    that does `const { x } = require('@whiskeysockets/baileys')`,
+//    we load it ONCE here with a dynamic import(), then seed Node's
+//    own require() cache with the result. After that, require() of
+//    the package from ANY file (plugins, command.js, anywhere) just
+//    reads from the cache and returns the same object — no plugin
+//    code needs to change at all.
+let makeWASocket,
+    useMultiFileAuthState,
+    DisconnectReason,
+    fetchLatestBaileysVersion,
+    makeCacheableSignalKeyStore,
+    getContentType,
+    jidDecode
+
+let commands // populated after baileys is cached (see boot section)
+
+async function loadBaileys() {
+  const baileys = await import('@whiskeysockets/baileys')
+
+  // seed require() cache so every other file's require('@whiskeysockets/baileys')
+  // keeps working unchanged
+  const resolvedPath = require.resolve('@whiskeysockets/baileys')
+  require.cache[resolvedPath] = {
+    id:       resolvedPath,
+    filename: resolvedPath,
+    loaded:   true,
+    exports:  baileys,
+  }
+
+  makeWASocket                = baileys.default
+  useMultiFileAuthState       = baileys.useMultiFileAuthState
+  DisconnectReason            = baileys.DisconnectReason
+  fetchLatestBaileysVersion   = baileys.fetchLatestBaileysVersion
+  makeCacheableSignalKeyStore = baileys.makeCacheableSignalKeyStore
+  getContentType               = baileys.getContentType
+  jidDecode                    = baileys.jidDecode
+}
 
 const P         = require('pino')
 const NodeCache = require('node-cache')
@@ -24,7 +55,6 @@ const fs        = require('fs')
 const path      = require('path')
 const qrcode    = require('qrcode-terminal')
 const config    = require('./config')
-const { commands } = require('./command')
 
 const SESSION_DIR = path.join(__dirname, 'sessions')
 const PLUGINS_DIR = path.join(__dirname, 'plugins')
@@ -363,4 +393,17 @@ async function connectToWA() {
 
 // ── boot ──────────────────────────────────────────────────────
 console.log('🐼 GARFIELD BOT v11 — Xnodes Development\n')
-connectToWA()
+
+loadBaileys()
+  .then(() => {
+    // command.js (and anything it pulls in, including plugin files that
+    // import baileys at module scope) is only required now — by this
+    // point the require() cache for '@whiskeysockets/baileys' is already
+    // seeded, so their plain require() calls resolve normally.
+    ;({ commands } = require('./command'))
+    return connectToWA()
+  })
+  .catch(e => {
+    console.error('[BAILEYS LOAD ERROR]', e.message)
+    process.exit(1)
+  })
