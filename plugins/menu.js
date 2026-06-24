@@ -23,7 +23,7 @@ commands.push({
 
     const menu = `
 ▬
-▎ 𝖦Λ𝖱𝖥𝖨Ξ𝖫𝖣 𝖡𝖮Т v11
+▎ 𝖦Λ𝖱𝖥𝖨Ξ𝖫𝖣 𝖡𝖮Т v11.4
 ▎ █ 𝗛𝗲𝘆: ${pushname}
 ▎ █ 𝗦𝗽𝗲𝗲𝗱: ${Date.now() - start}ms
 ▎ █ 𝗕𝗼𝘁 𝗡𝗮𝗺𝗲: ${config.BOT_NAME || 'Garfield'}
